@@ -1,0 +1,3 @@
+#!/bin/sh
+export PROBS_MANG_BIN="${PROBS_MANG_BIN:-/home/saurabh/gitrepos/probs-mang/build/probs_mang}"
+exec "/usr/bin/python3" "/home/saurabh/gitrepos/probs-mang/ui/gui.py" "$@"

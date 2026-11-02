@@ -1,0 +1,3 @@
+#!/bin/sh
+export PROBS_MANG_BIN="${PROBS_MANG_BIN:-/home/saurabh/.local/libexec/probs_mang/probs_mang}"
+exec "/usr/bin/python3" "/home/saurabh/.local/share/probs_mang/gui.py" "$@"

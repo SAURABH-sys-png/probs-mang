@@ -1,7 +1,11 @@
 file(REMOVE_RECURSE
   "CMakeFiles/probs_mang.dir/link.d"
+  "CMakeFiles/probs_mang.dir/database/db.cpp.o"
+  "CMakeFiles/probs_mang.dir/database/db.cpp.o.d"
   "CMakeFiles/probs_mang.dir/engine/api.cpp.o"
   "CMakeFiles/probs_mang.dir/engine/api.cpp.o.d"
+  "CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o"
+  "CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o.d"
   "CMakeFiles/probs_mang.dir/engine/primary.cpp.o"
   "CMakeFiles/probs_mang.dir/engine/primary.cpp.o.d"
   "CMakeFiles/probs_mang.dir/main.cpp.o"

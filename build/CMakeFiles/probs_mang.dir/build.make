@@ -114,11 +114,41 @@ CMakeFiles/probs_mang.dir/engine/primary.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/probs_mang.dir/engine/primary.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/saurabh/gitrepos/probs-mang/engine/primary.cpp -o CMakeFiles/probs_mang.dir/engine/primary.cpp.s
 
+CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o: CMakeFiles/probs_mang.dir/flags.make
+CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o: /home/saurabh/gitrepos/probs-mang/engine/data_analysis.cpp
+CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o: CMakeFiles/probs_mang.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/saurabh/gitrepos/probs-mang/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o -MF CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o.d -o CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o -c /home/saurabh/gitrepos/probs-mang/engine/data_analysis.cpp
+
+CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/saurabh/gitrepos/probs-mang/engine/data_analysis.cpp > CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.i
+
+CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/saurabh/gitrepos/probs-mang/engine/data_analysis.cpp -o CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.s
+
+CMakeFiles/probs_mang.dir/database/db.cpp.o: CMakeFiles/probs_mang.dir/flags.make
+CMakeFiles/probs_mang.dir/database/db.cpp.o: /home/saurabh/gitrepos/probs-mang/database/db.cpp
+CMakeFiles/probs_mang.dir/database/db.cpp.o: CMakeFiles/probs_mang.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/saurabh/gitrepos/probs-mang/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/probs_mang.dir/database/db.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/probs_mang.dir/database/db.cpp.o -MF CMakeFiles/probs_mang.dir/database/db.cpp.o.d -o CMakeFiles/probs_mang.dir/database/db.cpp.o -c /home/saurabh/gitrepos/probs-mang/database/db.cpp
+
+CMakeFiles/probs_mang.dir/database/db.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/probs_mang.dir/database/db.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/saurabh/gitrepos/probs-mang/database/db.cpp > CMakeFiles/probs_mang.dir/database/db.cpp.i
+
+CMakeFiles/probs_mang.dir/database/db.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/probs_mang.dir/database/db.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/saurabh/gitrepos/probs-mang/database/db.cpp -o CMakeFiles/probs_mang.dir/database/db.cpp.s
+
 # Object files for target probs_mang
 probs_mang_OBJECTS = \
 "CMakeFiles/probs_mang.dir/main.cpp.o" \
 "CMakeFiles/probs_mang.dir/engine/api.cpp.o" \
-"CMakeFiles/probs_mang.dir/engine/primary.cpp.o"
+"CMakeFiles/probs_mang.dir/engine/primary.cpp.o" \
+"CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o" \
+"CMakeFiles/probs_mang.dir/database/db.cpp.o"
 
 # External object files for target probs_mang
 probs_mang_EXTERNAL_OBJECTS =
@@ -126,10 +156,14 @@ probs_mang_EXTERNAL_OBJECTS =
 probs_mang: CMakeFiles/probs_mang.dir/main.cpp.o
 probs_mang: CMakeFiles/probs_mang.dir/engine/api.cpp.o
 probs_mang: CMakeFiles/probs_mang.dir/engine/primary.cpp.o
+probs_mang: CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o
+probs_mang: CMakeFiles/probs_mang.dir/database/db.cpp.o
 probs_mang: CMakeFiles/probs_mang.dir/build.make
 probs_mang: CMakeFiles/probs_mang.dir/compiler_depend.ts
+probs_mang: /usr/lib/x86_64-linux-gnu/libpqxx.a
+probs_mang: /usr/lib/x86_64-linux-gnu/libpq.so
 probs_mang: CMakeFiles/probs_mang.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/saurabh/gitrepos/probs-mang/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable probs_mang"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/saurabh/gitrepos/probs-mang/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable probs_mang"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/probs_mang.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

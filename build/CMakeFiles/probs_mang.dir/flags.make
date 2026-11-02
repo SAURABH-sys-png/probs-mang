@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DPROBS_MANG_BINARY_DIR=\"/home/saurabh/gitrepos/probs-mang/build\" -DPROBS_MANG_CXX_COMPILER=\"/usr/bin/c++\" -DPROBS_MANG_SOURCE_DIR=\"/home/saurabh/gitrepos/probs-mang\"
 
-CXX_INCLUDES = -I/home/saurabh/gitrepos/probs-mang -I/home/saurabh/gitrepos/probs-mang/include -I/home/saurabh/gitrepos/probs-mang/engine
+CXX_INCLUDES = -I/home/saurabh/gitrepos/probs-mang -I/home/saurabh/gitrepos/probs-mang/include -I/home/saurabh/gitrepos/probs-mang/engine -isystem /usr/include/postgresql
 
 CXX_FLAGS = -std=c++17
 

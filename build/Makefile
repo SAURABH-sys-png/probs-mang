@@ -85,6 +85,51 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/saurabh/gitrepos/probs-mang/build/CMakeFiles /home/saurabh/gitrepos/probs-mang/build//CMakeFiles/progress.marks
@@ -129,6 +174,30 @@ probs_mang/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/build
 .PHONY : probs_mang/fast
 
+database/db.o: database/db.cpp.o
+.PHONY : database/db.o
+
+# target to build an object file
+database/db.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/database/db.cpp.o
+.PHONY : database/db.cpp.o
+
+database/db.i: database/db.cpp.i
+.PHONY : database/db.i
+
+# target to preprocess a source file
+database/db.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/database/db.cpp.i
+.PHONY : database/db.cpp.i
+
+database/db.s: database/db.cpp.s
+.PHONY : database/db.s
+
+# target to generate assembly for a file
+database/db.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/database/db.cpp.s
+.PHONY : database/db.cpp.s
+
 engine/api.o: engine/api.cpp.o
 .PHONY : engine/api.o
 
@@ -152,6 +221,30 @@ engine/api.s: engine/api.cpp.s
 engine/api.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/engine/api.cpp.s
 .PHONY : engine/api.cpp.s
+
+engine/data_analysis.o: engine/data_analysis.cpp.o
+.PHONY : engine/data_analysis.o
+
+# target to build an object file
+engine/data_analysis.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.o
+.PHONY : engine/data_analysis.cpp.o
+
+engine/data_analysis.i: engine/data_analysis.cpp.i
+.PHONY : engine/data_analysis.i
+
+# target to preprocess a source file
+engine/data_analysis.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.i
+.PHONY : engine/data_analysis.cpp.i
+
+engine/data_analysis.s: engine/data_analysis.cpp.s
+.PHONY : engine/data_analysis.s
+
+# target to generate assembly for a file
+engine/data_analysis.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/probs_mang.dir/build.make CMakeFiles/probs_mang.dir/engine/data_analysis.cpp.s
+.PHONY : engine/data_analysis.cpp.s
 
 engine/primary.o: engine/primary.cpp.o
 .PHONY : engine/primary.o
@@ -208,11 +301,21 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... probs_mang"
+	@echo "... database/db.o"
+	@echo "... database/db.i"
+	@echo "... database/db.s"
 	@echo "... engine/api.o"
 	@echo "... engine/api.i"
 	@echo "... engine/api.s"
+	@echo "... engine/data_analysis.o"
+	@echo "... engine/data_analysis.i"
+	@echo "... engine/data_analysis.s"
 	@echo "... engine/primary.o"
 	@echo "... engine/primary.i"
 	@echo "... engine/primary.s"
