@@ -1,3 +1,0 @@
-/home/saurabh/.local/libexec/probs_mang/probs_mang
-/home/saurabh/.local/share/probs_mang/gui.py
-/home/saurabh/.local/bin/compi
