@@ -51,7 +51,6 @@ Problem from_row(const pqxx::row& r) {
   return p;
 }
 
-// all the columns the problem owns, in $1..$15 order
 pqxx::params row_params(const Problem& p) {
   pqxx::params prm;
   prm.append(p.name);
@@ -73,7 +72,6 @@ pqxx::params row_params(const Problem& p) {
   return prm;
 }
 
-// SQL expression that turns the text parameter $2 into the column's type
 std::optional<std::string> column_cast(const std::string& column) {
   if (column == "name" || column == "file_path") return "$2";
   if (column == "date_of_doing") return "COALESCE(NULLIF($2, '')::date, CURRENT_DATE)";
@@ -119,7 +117,6 @@ bool DB::read(int id, Problem& p) {
   auto res = tx.exec(std::string(kSelect) + " WHERE id = $1", pqxx::params{id});
   if (res.empty()) return false;
   Problem loaded = from_row(res[0]);
-  // keep code / test cases already held by p
   loaded.code = p.code;
   loaded.test_cases = p.test_cases;
   p = loaded;

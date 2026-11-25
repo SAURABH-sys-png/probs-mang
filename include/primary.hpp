@@ -14,9 +14,8 @@ class Problem {
   std::string code = "";
   std::string test_cases = "";
 
-  // metadata mirrored from the `problems` table
-  int id = -1;  // -1 => not yet stored in the database
-  std::string date_of_doing = "";  // YYYY-MM-DD, empty => today
+  int id = -1;
+  std::string date_of_doing = "";
   std::string comment = "";
   bool is_completed = false;
   std::string platform = "";
@@ -36,14 +35,11 @@ class Problem {
   std::string check_runtime();
   void submit();
 
-  // file handling: <source>/test/<name>.cpp and <source>/test/input_<name>.txt
   std::string code_path() const;
   std::string test_cases_path() const;
   bool has_test_cases() const;
   bool save();
   bool load_files();
-  // compiles and runs with stdin left attached to the caller's terminal
   std::string run_interactive();
-  // sets a metadata member from its column name, returns false on bad input
   bool set_field(const std::string& key, const std::string& value);
 };

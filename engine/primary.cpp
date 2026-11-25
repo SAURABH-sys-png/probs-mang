@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <sys/wait.h>
 #include <termios.h>
+#include <unordered_map>
 #include <unistd.h>
 
 namespace fs = std::filesystem;
@@ -62,7 +63,6 @@ void Problem::submit() {
   if (!save()) throw std::runtime_error("could not save the files of " + name);
   DB db(con_str);
   std::cout << "Database connected" << '\n';
-  // update the stored row, or insert a new one if it is not there (anymore)
   if (id < 0 || !db.update(*this)) db.create(*this);
 }
 
@@ -90,7 +90,6 @@ bool Problem::save() {
   code_file.close();
   if (!code_file) return false;
 
-  // check_runtime() reads input_<name>.txt, so it only exists when there are test cases
   if (test_cases.empty()) {
     fs::remove(test_cases_path(), ec);
     return true;
@@ -125,8 +124,7 @@ std::string Problem::run_interactive() {
   fs::current_path(target_dir, ec);
   if (ec) return "Runtime error: can not open " + target_dir.string();
 
-  // The GUI drives us through a raw pty, switch it to line mode while the
-  // program runs so that it gets whole lines and Ctrl-D works as EOF.
+  // gui gives a raw pty, need line mode so ctrl-d works
   termios saved{};
   bool tty = isatty(STDIN_FILENO) && tcgetattr(STDIN_FILENO, &saved) == 0;
   if (tty) {
@@ -141,7 +139,6 @@ std::string Problem::run_interactive() {
   int res = std::system(executable_command_str.c_str());
 
   if (tty) {
-    // drop whatever the program did not read so it is not taken as a command
     tcflush(STDIN_FILENO, TCIFLUSH);
     tcsetattr(STDIN_FILENO, TCSANOW, &saved);
   }
@@ -177,47 +174,95 @@ std::string trim(const std::string& s) {
   return s.substr(b, e - b + 1);
 }
 
+enum class Field {
+  Id,
+  DateOfDoing,
+  Comment,
+  IsCompleted,
+  Platform,
+  ProblemType,
+  Difficulty,
+  TimeTakenMinutes,
+  TimeComplexity,
+  SpaceComplexity,
+  Tags,
+  RevisionCount,
+  ImportanceRating,
+};
+
+const std::unordered_map<std::string, Field> field_names = {
+    {"id", Field::Id},
+    {"date_of_doing", Field::DateOfDoing},
+    {"comment", Field::Comment},
+    {"is_completed", Field::IsCompleted},
+    {"platform", Field::Platform},
+    {"problem_type", Field::ProblemType},
+    {"difficulty", Field::Difficulty},
+    {"time_taken_minutes", Field::TimeTakenMinutes},
+    {"time_complexity", Field::TimeComplexity},
+    {"space_complexity", Field::SpaceComplexity},
+    {"tags", Field::Tags},
+    {"revision_count", Field::RevisionCount},
+    {"importance_rating", Field::ImportanceRating},
+};
+
 }  // namespace
 
 bool Problem::set_field(const std::string& key, const std::string& value) {
-  if (key == "id") {
-    std::optional<int> v;
-    if (!parse_int(value, v)) return false;
-    id = v.value_or(-1);
-  } else if (key == "date_of_doing") {
-    date_of_doing = value;
-  } else if (key == "comment") {
-    comment = value;
-  } else if (key == "is_completed") {
-    is_completed = (value == "1" || value == "true" || value == "t" || value == "yes");
-  } else if (key == "platform") {
-    platform = value;
-  } else if (key == "problem_type") {
-    problem_type = value;
-  } else if (key == "difficulty") {
-    difficulty = value;
-  } else if (key == "time_taken_minutes") {
-    return parse_int(value, time_taken_minutes);
-  } else if (key == "time_complexity") {
-    time_complexity = value;
-  } else if (key == "space_complexity") {
-    space_complexity = value;
-  } else if (key == "tags") {
-    tags.clear();
-    std::stringstream ss(value);
-    std::string tag;
-    while (std::getline(ss, tag, ',')) {
-      tag = trim(tag);
-      if (!tag.empty()) tags.push_back(tag);
+  auto it = field_names.find(key);
+  if (it == field_names.end()) return false;
+
+  switch (it->second) {
+    case Field::Id: {
+      std::optional<int> v;
+      if (!parse_int(value, v)) return false;
+      id = v.value_or(-1);
+      break;
     }
-  } else if (key == "revision_count") {
-    std::optional<int> v;
-    if (!parse_int(value, v)) return false;
-    revision_count = v.value_or(0);
-  } else if (key == "importance_rating") {
-    return parse_int(value, importance_rating);
-  } else {
-    return false;
+    case Field::DateOfDoing:
+      date_of_doing = value;
+      break;
+    case Field::Comment:
+      comment = value;
+      break;
+    case Field::IsCompleted:
+      is_completed = (value == "1" || value == "true" || value == "t" || value == "yes");
+      break;
+    case Field::Platform:
+      platform = value;
+      break;
+    case Field::ProblemType:
+      problem_type = value;
+      break;
+    case Field::Difficulty:
+      difficulty = value;
+      break;
+    case Field::TimeTakenMinutes:
+      return parse_int(value, time_taken_minutes);
+    case Field::TimeComplexity:
+      time_complexity = value;
+      break;
+    case Field::SpaceComplexity:
+      space_complexity = value;
+      break;
+    case Field::Tags: {
+      tags.clear();
+      std::stringstream ss(value);
+      std::string tag;
+      while (std::getline(ss, tag, ',')) {
+        tag = trim(tag);
+        if (!tag.empty()) tags.push_back(tag);
+      }
+      break;
+    }
+    case Field::RevisionCount: {
+      std::optional<int> v;
+      if (!parse_int(value, v)) return false;
+      revision_count = v.value_or(0);
+      break;
+    }
+    case Field::ImportanceRating:
+      return parse_int(value, importance_rating);
   }
   return true;
 }

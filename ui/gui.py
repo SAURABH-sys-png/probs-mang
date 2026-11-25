@@ -1,22 +1,5 @@
 #!/usr/bin/env python3
-"""probs-mang GUI: track the DSA problems you solve.
-
-Welcome window
-    left  : basic operations (new / browse / edit / delete problems)
-    right : statistics (top, filled later from data_analysis) and the
-            consistency calendar (bottom)
-
-Problem window
-    top          : problem name (also shown as the window title)
-    left         : code
-    top right    : terminal, compile / run output, type program input here
-    bottom right : test cases, used as stdin by Run
-
-Everything is done by the C++ backend (build/probs_mang) through the line
-protocol of engine/api.cpp: one command per line, the value on the next line,
-replies are lines that start with "\\x1e".
-"""
-
+# ai auditted can have mistakes
 from __future__ import annotations
 
 import codecs
@@ -41,10 +24,6 @@ APP_NAME = "DSA Management"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-# --------------------------------------------------------------------------
-# backend protocol
-# --------------------------------------------------------------------------
-
 def find_backend():
     candidates = [
         os.environ.get("PROBS_MANG_BIN"),
@@ -58,7 +37,7 @@ def find_backend():
 
 
 BACKEND = find_backend()
-RS = "\x1e"  # starts every reply line of the backend
+RS = "\x1e"
 ANSI_RE = re.compile(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*\x07|[@-Z\\-_])")
 
 
@@ -73,7 +52,6 @@ def unescape(s):
 
 
 def parse_row(payload):
-    """ROW payload -> dict of column -> text value."""
     row = {}
     for part in payload.split("\t"):
         key, sep, value = part.partition("=")
@@ -84,7 +62,7 @@ def parse_row(payload):
 
 def backend_env():
     env = dict(os.environ)
-    env["TERM"] = "dumb"   # no colour escapes from g++
+    env["TERM"] = "dumb"
     env["GCC_COLORS"] = ""
     return env
 
@@ -94,10 +72,6 @@ class BackendError(Exception):
 
 
 def backend_call(lines, timeout=30):
-    """Run the backend once with the given command lines.
-
-    Returns the replies as a list of (tag, payload) tuples.
-    """
     if not BACKEND:
         raise BackendError("backend not found, build it with:\n"
                            "cmake -S . -B build && cmake --build build")
@@ -120,19 +94,11 @@ def backend_call(lines, timeout=30):
 
 
 def sanitize_name(raw):
-    """Problem names are file names (test/<name>.cpp): letters, digits, _ and -."""
     name = re.sub(r"\s+", "_", raw.strip())
     return re.sub(r"[^A-Za-z0-9_-]", "", name)[:100]
 
 
 class PtySession:
-    """One backend process on a pseudo terminal.
-
-    The commands are written up front; output is streamed to on_text, reply
-    lines go to on_reply. When the reply "DONE <final>" arrives END is sent,
-    so anything typed until then reaches the running program instead.
-    """
-
     def __init__(self, widget, on_text, on_reply, on_exit):
         self.widget = widget
         self.on_text = on_text
@@ -153,7 +119,7 @@ class PtySession:
             raise BackendError("backend not found, build it with:\n"
                                "cmake -S . -B build && cmake --build build")
         master, slave = os.openpty()
-        tty.setraw(slave)  # commands may be long lines, no echo
+        tty.setraw(slave)
         try:
             self.proc = subprocess.Popen([BACKEND], stdin=slave, stdout=slave,
                                          stderr=slave, start_new_session=True,
@@ -200,7 +166,7 @@ class PtySession:
         while True:
             try:
                 data = os.read(self.master, 65536)
-            except OSError:  # EIO once the backend is gone
+            except OSError:
                 data = b""
             if not data:
                 break
@@ -244,7 +210,7 @@ class PtySession:
         else:
             try:
                 self.widget.after(20, self._poll)
-            except tk.TclError:  # window closed
+            except tk.TclError:
                 self.stop()
 
     def _feed(self, data):
@@ -260,7 +226,7 @@ class PtySession:
                 self.buf = self.buf[i:]
             j = self.buf.find("\n")
             if j < 0:
-                return  # wait for the rest of the reply line
+                return
             tag, _, payload = self.buf[1:j].partition(" ")
             self.buf = self.buf[j + 1:]
             if tag == "INTERACTIVE":
@@ -271,10 +237,6 @@ class PtySession:
                 self.send("END\n")
             self.on_reply(tag, payload)
 
-
-# --------------------------------------------------------------------------
-# problem metadata (columns of the problems table)
-# --------------------------------------------------------------------------
 
 PLATFORMS = ["LeetCode", "Codeforces", "CodeChef", "AtCoder", "GeeksforGeeks",
              "HackerRank", "HackerEarth", "CSES", "SPOJ", "InterviewBit", "Other"]
@@ -289,7 +251,6 @@ COMPLEXITIES = ["O(1)", "O(log n)", "O(sqrt n)", "O(n)", "O(n log n)", "O(n^2)",
                 "O(n^2 log n)", "O(n^3)", "O(2^n)", "O(n!)", "O(V + E)",
                 "O(E log V)", "O(n * m)"]
 
-# key, label, kind, choices, max length
 FIELDS = [
     ("date_of_doing", "Date (YYYY-MM-DD)", "date", None, None),
     ("platform", "Platform", "text", PLATFORMS, 50),
@@ -319,8 +280,6 @@ def is_true(value):
 
 
 class MetadataDialog(tk.Toplevel):
-    """Modal form for the metadata columns, self.result is the edited dict."""
-
     def __init__(self, parent, meta, title):
         super().__init__(parent)
         self.title(title)
@@ -407,10 +366,6 @@ def ask_metadata(parent, meta, title="Problem details"):
     return dialog.result
 
 
-# --------------------------------------------------------------------------
-# widgets
-# --------------------------------------------------------------------------
-
 def mono_font(size=11):
     family = tkfont.nametofont("TkFixedFont").actual("family")
     for candidate in ("JetBrains Mono", "Fira Code", "DejaVu Sans Mono",
@@ -422,12 +377,6 @@ def mono_font(size=11):
 
 
 class Terminal(ttk.Frame):
-    """Output console that also takes keyboard input after the last output.
-
-    Enter sends the typed line, Ctrl-D sends EOF, Ctrl-C (without a selection)
-    stops the running program.
-    """
-
     MAX_LINES = 5000
     NAV_KEYS = {"Left", "Right", "Up", "Down", "Home", "End", "Prior", "Next",
                 "Shift_L", "Shift_R", "Control_L", "Control_R", "Alt_L", "Alt_R",
@@ -477,7 +426,6 @@ class Terminal(ttk.Frame):
         t.bind("<<PasteSelection>>", self._to_input)
         t.bind("<<Cut>>", self._on_cut)
 
-    # output -------------------------------------------------------------
     def write(self, s, tag=None):
         if not s:
             return
@@ -504,7 +452,6 @@ class Terminal(ttk.Frame):
     def clear(self):
         self.text.delete("1.0", "inp")
 
-    # input --------------------------------------------------------------
     def _in_output(self, index="insert"):
         return self.text.compare(index, "<", "inp")
 
@@ -562,7 +509,7 @@ class Terminal(ttk.Frame):
 
     def _on_ctrl_c(self, event):
         if self.text.tag_ranges("sel"):
-            return None  # copy
+            return None
         self.text.insert("end", "^C\n", "dim")
         self.text.mark_set("inp", "end-1c")
         self.on_interrupt()
@@ -601,8 +548,6 @@ int main() {
 
 
 class CodeEditor(ttk.Frame):
-    """Text widget with line numbers, C++ highlighting and auto indent."""
-
     def __init__(self, master, on_change=None):
         super().__init__(master)
         self.on_change = on_change
@@ -640,7 +585,6 @@ class CodeEditor(ttk.Frame):
         t.bind("<<Modified>>", self._on_modified)
         t.bind("<Configure>", lambda e: self._redraw_gutter())
 
-    # content ------------------------------------------------------------
     def get(self):
         return self.text.get("1.0", "end-1c")
 
@@ -651,7 +595,6 @@ class CodeEditor(ttk.Frame):
         self.text.mark_set("insert", "1.0")
         self._highlight()
 
-    # editing helpers ----------------------------------------------------
     def _on_tab(self, event):
         t = self.text
         if t.tag_ranges("sel"):
@@ -695,7 +638,6 @@ class CodeEditor(ttk.Frame):
         if before and not before.strip() and before.endswith("    "):
             t.delete("insert-5c", "insert-1c")
 
-    # highlighting -------------------------------------------------------
     def _on_modified(self, event=None):
         if not self.text.edit_modified():
             return
@@ -724,7 +666,6 @@ class CodeEditor(ttk.Frame):
                     self.text.tag_add(tag, index(m.start()), index(m.end()))
         self._redraw_gutter()
 
-    # line numbers -------------------------------------------------------
     def _on_yscroll(self, first, last):
         self._ys.set(first, last)
         self._redraw_gutter()
@@ -747,8 +688,6 @@ class CodeEditor(ttk.Frame):
 
 
 class ConsistencyCalendar(ttk.Frame):
-    """GitHub style heat map of problems per day."""
-
     COLORS = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"]
     ROLLING = "Last 12 months"
 
@@ -802,7 +741,7 @@ class ConsistencyCalendar(ttk.Frame):
         else:
             end = today
             start = today - dt.timedelta(days=364)
-        grid_start = start - dt.timedelta(days=(start.weekday() + 1) % 7)  # Sunday
+        grid_start = start - dt.timedelta(days=(start.weekday() + 1) % 7)
         return start, end, grid_start
 
     def _level(self, count):
@@ -854,7 +793,6 @@ class ConsistencyCalendar(ttk.Frame):
                 self.items[item] = day
             day += dt.timedelta(days=1)
 
-        # summary and legend
         in_range = sum(n for d, n in self.counts.items() if start <= d <= end)
         current, longest = self._streaks(today)
         period = "the last 12 months" if not self.period.get().isdigit() else self.period.get()
@@ -917,13 +855,7 @@ class ConsistencyCalendar(ttk.Frame):
             self.on_day_click(day)
 
 
-# --------------------------------------------------------------------------
-# problem editor window
-# --------------------------------------------------------------------------
-
 class ProblemEditor(tk.Toplevel):
-    """Name on top, code left, terminal top right, test cases bottom right."""
-
     def __init__(self, app, loaded=None):
         super().__init__(app.root)
         self.app = app
@@ -959,7 +891,6 @@ class ProblemEditor(tk.Toplevel):
             self.terminal.line(f"Opened problem {self.problem_id}: {row.get('name')}"
                                f"  ({row.get('file_path', '')})", "dim")
 
-    # layout -------------------------------------------------------------
     def _build(self):
         top = ttk.Frame(self, padding=(10, 8))
         top.pack(fill=tk.X)
@@ -1043,7 +974,6 @@ class ProblemEditor(tk.Toplevel):
         ):
             self.bind(seq, lambda e, a=action: (a(), "break")[1])
 
-    # helpers ------------------------------------------------------------
     def _set_test_cases(self, content):
         self.tests.delete("1.0", "end")
         self.tests.insert("1.0", content)
@@ -1088,7 +1018,6 @@ class ProblemEditor(tk.Toplevel):
         return name
 
     def _validated_name(self):
-        """The problem name, after making sure no other problem's files get overwritten."""
         name = self._normalize_name()
         if not name:
             messagebox.showwarning(APP_NAME, "Enter the problem name at the top first.",
@@ -1143,7 +1072,6 @@ class ProblemEditor(tk.Toplevel):
         self.terminal.line(f"loaded test/{name}.cpp, press the button again to continue",
                            "dim")
 
-    # actions ------------------------------------------------------------
     def _run_action(self, action, label, before=None):
         if self.session and self.session.alive:
             self.bell()
@@ -1162,7 +1090,6 @@ class ProblemEditor(tk.Toplevel):
             lines += ["FIELD", f"id={self.problem_id}"]
         for key in META_KEYS:
             lines += ["FIELD", f"{key}={escape(self.meta.get(key, ''))}"]
-        # every action stores the files and the database row first
         lines.append("SUBMIT")
         if action != "SUBMIT":
             lines.append(action)
@@ -1283,7 +1210,7 @@ class ProblemEditor(tk.Toplevel):
                     return
                 self.after_session = lambda: self.close(force=not self.dirty())
                 self._run_action("SUBMIT", "save")
-                if self.session is None:  # could not start (e.g. no name)
+                if self.session is None:
                     self.after_session = None
                 return
         if self.session and self.session.alive:
@@ -1292,10 +1219,6 @@ class ProblemEditor(tk.Toplevel):
             self.app.editors.remove(self)
         self.destroy()
 
-
-# --------------------------------------------------------------------------
-# problems browser
-# --------------------------------------------------------------------------
 
 class ProblemsWindow(tk.Toplevel):
     COLUMNS = [("id", "ID", 50), ("name", "Name", 210), ("date_of_doing", "Date", 95),
@@ -1497,17 +1420,9 @@ class ProblemsWindow(tk.Toplevel):
         self.app.delete_problem(int(p["id"]), parent=self)
 
 
-# --------------------------------------------------------------------------
-# welcome window
-# --------------------------------------------------------------------------
-
 def render_statistics(frame, problems):
-    """Fill the statistics panel of the welcome window.
-
-    Left empty on purpose, to be implemented with data_analysis.
-    `frame` is the empty panel, `problems` the rows of the problems table
-    (dicts of column -> text). Called after every refresh.
-    """
+    # todo: fill using data_analysis
+    pass
 
 
 class App:
@@ -1542,7 +1457,6 @@ class App:
         paned = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
         paned.pack(fill=tk.BOTH, expand=True)
 
-        # left sidebar: basic operations
         side = ttk.Frame(paned, relief=tk.SUNKEN, padding=10)
         ttk.Label(side, text="Options", font=("TkDefaultFont", 11, "bold")
                   ).pack(fill=tk.X, pady=(0, 6))
@@ -1567,7 +1481,6 @@ class App:
         self.db_status.pack(fill=tk.X, pady=(4, 6))
         ttk.Button(side, text="Quit", command=self.quit).pack(fill=tk.X)
 
-        # right: statistics (top) and calendar (bottom)
         right = ttk.PanedWindow(paned, orient=tk.VERTICAL)
         stats = ttk.Frame(right, relief=tk.SUNKEN)
         ttk.Label(stats, text="Statistics", font=("TkDefaultFont", 11, "bold"),
@@ -1584,12 +1497,11 @@ class App:
         paned.add(side, weight=1)
         paned.add(right, weight=4)
 
-    # background calls ---------------------------------------------------
     def run_async(self, fn, done):
         def work():
             try:
                 result = (fn(), None)
-            except Exception as e:  # reported to done()
+            except Exception as e:
                 result = (None, e)
             self._jobs.put((done, result))
         threading.Thread(target=work, daemon=True).start()
@@ -1603,7 +1515,6 @@ class App:
             done(result, error)
         self.root.after(50, self._poll_jobs)
 
-    # data ---------------------------------------------------------------
     def refresh(self):
         self.db_status.configure(text="Loading…", foreground="#57606a")
         self.run_async(lambda: backend_call(["INFO", "LIST"]), self._on_refreshed)
@@ -1689,7 +1600,6 @@ class App:
             self.refresh()
         self.run_async(lambda: backend_call(["DELETE", str(problem_id)]), done)
 
-    # windows ------------------------------------------------------------
     def new_problem(self):
         editor = ProblemEditor(self)
         self.editors.append(editor)
@@ -1722,7 +1632,7 @@ class App:
                                      parent=self.root)
                 return
             if any(e.problem_id == problem_id for e in self.editors):
-                return  # opened twice quickly
+                return
             editor = ProblemEditor(self, loaded)
             self.editors.append(editor)
             for msg in errors:

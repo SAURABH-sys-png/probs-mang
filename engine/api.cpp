@@ -28,7 +28,6 @@ bool parse_id(const std::string& s, int& id) {
   }
 }
 
-// "@@ROW" line: tab separated key=value pairs, values escaped
 void emit_row(const Problem& p) {
   auto opt_int = [](const std::optional<int>& v) {
     return v ? std::to_string(*v) : std::string{};
@@ -59,7 +58,6 @@ void emit_row(const Problem& p) {
   emit("ROW", line);
 }
 
-// split "key=value" (value escaped)
 bool split_field(const std::string& line, std::string& key, std::string& value) {
   size_t eq = line.find('=');
   if (eq == std::string::npos || eq == 0) return false;
@@ -105,8 +103,6 @@ std::string unescape(const std::string& s) {
 }
 
 void emit(const std::string& tag, const std::string& payload) {
-  // ROW / CODE / TESTCASES come escaped already, messages are trimmed and
-  // escaped here so a multi-line error still is one reply line
   std::string line = payload;
   if (tag != "ROW" && tag != "CODE" && tag != "TESTCASES") {
     size_t end = line.find_last_not_of(" \r\n");
@@ -130,19 +126,17 @@ void turn(Problem* obj) {
   std::string run = "RUN";
   std::string submit = "SUBMIT";
 
-  // crud / helper commands used by the gui
-  std::string save = "SAVE";            // write <name>.cpp and input_<name>.txt
-  std::string run_manual = "RUNI";      // run with input typed in the terminal
-  std::string field = "FIELD";          // next line: key=value (metadata)
-  std::string load = "LOAD";            // next line: id   -> ROW, CODE, TESTCASES
-  std::string list = "LIST";            // every row       -> ROW...
-  std::string update = "UPDATE";        // next lines: id, key=value
-  std::string remove = "DELETE";        // next line: id
-  std::string activity = "ACTIVITY";    // problems per day -> DAY date count
-  std::string reset = "NEW";            // forget the current problem
-  std::string info = "INFO";            // paths used by the backend
+  std::string save = "SAVE";
+  std::string run_manual = "RUNI";
+  std::string field = "FIELD";
+  std::string load = "LOAD";
+  std::string list = "LIST";
+  std::string update = "UPDATE";
+  std::string remove = "DELETE";
+  std::string activity = "ACTIVITY";
+  std::string reset = "NEW";
+  std::string info = "INFO";
 
-  // flush after every write, the gui shows output as it comes
   std::cout << std::unitbuf;
 
   while (true) {
